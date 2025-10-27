@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ug@smv7q_4tzy2brlb(y9^por^!nx%^=u8mi8a&c8&%5#!an8o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','127.0.0.1']
 
 
 # Application definition
@@ -121,3 +121,50 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- Dev helpers: enable REST, CORS and add Codespace preview host (development only) ---
+try:
+    INSTALLED_APPS += ["rest_framework", "corsheaders", "api"]
+except NameError:
+    INSTALLED_APPS = ["rest_framework", "corsheaders", "api"]
+
+try:
+    # put CorsMiddleware near the top of the stack
+    MIDDLEWARE = ["corsheaders.middleware.CorsMiddleware"] + MIDDLEWARE
+except NameError:
+    MIDDLEWARE = ["corsheaders.middleware.CorsMiddleware"]
+
+import os
+codespace_name = os.environ.get("CODESPACE_NAME")
+if codespace_name:
+    try:
+        ALLOWED_HOSTS.append(f"{codespace_name}-8000.app.github.dev")
+    except NameError:
+        ALLOWED_HOSTS = [f"{codespace_name}-8000.app.github.dev"]
+else:
+    try:
+        ALLOWED_HOSTS += ["localhost", "127.0.0.1"]
+    except NameError:
+        ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+# Development convenience only: allow all origins (remove/lock down for production)
+CORS_ALLOW_ALL_ORIGINS = True
+# --- end dev helpers ---
+
+# --- Dev-only hosts & CORS helpers (safe append) ---
+import os
+codespace_name = os.environ.get("CODESPACE_NAME")
+if codespace_name:
+    try:
+        ALLOWED_HOSTS.append(f"{codespace_name}-8000.app.github.dev")
+    except NameError:
+        ALLOWED_HOSTS = [f"{codespace_name}-8000.app.github.dev"]
+else:
+    try:
+        ALLOWED_HOSTS += ["localhost", "127.0.0.1"]
+    except NameError:
+        ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+# Allow all origins for local development (remove in production)
+CORS_ALLOW_ALL_ORIGINS = True
+# --- end dev-only helpers ---
